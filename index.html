@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" href="icon.png">
+<meta charset="UTF-8">
+<title>CalPsych</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; color: #2b2a26; }
+
+  /* ---------- view switcher (not part of replica; lets you flip between the 3 pages) ---------- */
+  .viewbar { display:flex; gap:8px; justify-content:center; padding:10px; background:#1f1e1c; }
+  .viewbar button { font-family:inherit; font-size:12.5px; font-weight:600; padding:7px 14px; border-radius:999px; border:1px solid #444; background:#2b2a26; color:#cfcdc6; cursor:pointer; transition:.15s; }
+  .viewbar button.active { background:#fff; color:#1f1e1c; border-color:#fff; }
+  .viewbar button:hover:not(.active) { border-color:#777; color:#fff; }
+
+  .page { display:none; }
+  .page.active { display:block; }
+
+  /* ---------- shared shell ---------- */
+  header.site { display:flex; align-items:center; justify-content:space-between; padding:16px 48px; background:#fff; border-bottom:1px solid #eee; }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:800; font-size:16.5px; }
+  .brand .mark { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:14px; }
+  nav.site { display:flex; gap:30px; }
+  nav.site a { text-decoration:none; color:#57554e; font-size:14.5px; font-weight:500; }
+  nav.site a.active { font-weight:700; }
+
+  main.hero { padding:44px 48px 20px; }
+  .eyebrow { display:inline-block; font-size:11.5px; font-weight:700; letter-spacing:.04em; padding:5px 12px; border-radius:6px; margin-bottom:16px; }
+  h1.title { font-size:38px; font-weight:800; letter-spacing:-0.01em; margin-bottom:12px; }
+  p.sub { font-size:15.5px; color:#5c5a53; max-width:900px; line-height:1.5; margin-bottom:32px; }
+
+  .grid { display:grid; grid-template-columns:1.6fr 1fr; gap:24px; padding:0 48px 48px; align-items:start; }
+  .card { background:#fff; border-radius:16px; padding:28px 28px 24px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+  .field-label { font-size:13.5px; font-weight:700; margin-bottom:8px; display:block; }
+  input.name-input { width:100%; padding:11px 14px; border:1px solid #e0ddd4; border-radius:9px; font-size:14.5px; font-family:inherit; margin-bottom:24px; color:#2b2a26; }
+
+  table.rows { width:100%; border-collapse:collapse; }
+  table.rows th { text-align:left; font-size:12px; color:#8a877e; font-weight:700; padding-bottom:10px; }
+  table.rows th:last-child, table.rows td:last-child { text-align:right; }
+  table.rows td { padding:10px 0; vertical-align:middle; }
+  table.rows td.name { font-size:14.5px; font-weight:600; padding-right:10px; }
+  table.rows input, table.rows select { width:100px; padding:8px 10px; border:1px solid #e0ddd4; border-radius:8px; font-size:13.5px; font-family:inherit; }
+  table.rows .remove { color:#c9573f; font-size:13.5px; font-weight:600; background:none; border:none; cursor:pointer; font-family:inherit; }
+
+  .addrow { margin-top:14px; background:#fff; border:1px solid #cdd6bd; border-radius:9px; padding:9px 16px; font-size:13.5px; font-weight:600; cursor:pointer; font-family:inherit; }
+  .totalrow { text-align:right; font-size:13px; color:#8a877e; margin:14px 0 18px; }
+  .calcbtn { width:100%; border:none; padding:14px; border-radius:10px; color:#fff; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; }
+
+  .outcome { border-radius:16px; padding:28px; }
+  .outcome h2 { font-size:19px; font-weight:800; margin-bottom:22px; }
+  .outcome .label { font-size:13px; opacity:.85; margin-bottom:6px; }
+  .outcome .big { font-size:46px; font-weight:800; margin-bottom:18px; line-height:1; }
+  .hr { height:1px; background:rgba(0,0,0,.08); margin:16px 0; }
+  .outcome .row { display:flex; justify-content:space-between; align-items:center; font-size:14px; padding:6px 0; }
+  .outcome .row b { font-size:16px; font-weight:800; }
+  .proj { margin-top:20px; border-radius:10px; padding:16px 18px; }
+  .proj .head { font-size:12px; font-weight:800; letter-spacing:.03em; margin-bottom:8px; }
+  .proj p { font-size:13.5px; line-height:1.5; }
+
+  .whitecard-inner { border-radius:12px; padding:20px; margin-bottom:0; }
+  .stat-line { display:flex; justify-content:space-between; font-size:14px; margin-top:16px; }
+  .stat-line b { font-weight:700; }
+  .trendlabel { font-size:11.5px; font-weight:800; letter-spacing:.03em; color:#9a968b; margin:22px 0 10px; }
+  .bars { display:flex; align-items:flex-end; gap:14px; height:60px; }
+  .bars .bar { width:26px; border-radius:5px 5px 0 0; }
+  .bars .barwrap { text-align:center; font-size:11px; color:#8a877e; }
+
+  footer.site { display:flex; justify-content:space-between; align-items:center; padding:22px 48px; border-top:1px solid #eee; font-size:13px; }
+  footer.site .links { display:flex; gap:22px; color:#57554e; }
+  footer .small { color:#8a877e; font-size:12px; margin-top:2px; }
+
+  /* ---------- new input styles: radio groups, sliders, toggles ---------- */
+  .radio-group { display:flex; gap:20px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+  .radio-option { display:flex; align-items:center; gap:6px; font-size:13.5px; font-weight:600; cursor:pointer; color:#2b2a26; }
+  .radio-option input[type=radio] { width:17px; height:17px; cursor:pointer; margin:0; }
+  .slider-row { display:flex; align-items:center; gap:10px; justify-content:flex-end; }
+  .slider-row input[type=range] { flex:1; min-width:90px; cursor:pointer; }
+  .slider-row input[type=number] { width:64px; flex-shrink:0; }
+  .toggle-group { display:flex; gap:8px; justify-content:flex-end; }
+  .toggle-btn { padding:8px 16px; border:1px solid #e0ddd4; border-radius:8px; background:#fff; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; color:#5c5a53; transition:.15s; }
+</style>
+</head>
+<body>
+
+<div class="viewbar">
+  <button data-view="course" class="active">1 · Exam Grade Calculator</button>
+  <button data-view="gpa">2 · Course Grade Calculator</button>
+  <button data-view="degree">3 · Academic Year Calculator</button>
+  <button data-view="about">4 · About</button>
+</div>
+
+<!-- ================= PAGE 1: EXAM GRADE ================= -->
+<div class="page active" id="page-course" style="background:#FAF6EA;">
+  <header class="site">
+    <div class="brand"><span class="mark" style="background:#7C8B5D;">%</span>CalPsych</div>
+    <nav class="site"><a href="#" class="active" style="color:#7C8B5D;" onclick="showPage('course');return false;">Calculator</a><a href="#" onclick="showPage('about');return false;">About</a></nav>
+  </header>
+  <main class="hero">
+    <span class="eyebrow" style="background:#DDE6C7; color:#5A6B3E;">SCARY EXAM ESTIMATOR</span>
+    <h1 class="title">Exam Grade Calculator</h1>
+    <p class="sub">Exams tend to be scary... especially when you are unsure on how to calculate your grade and what this means for your entire course. This tool is designed to help you! Fill in the blanks and calculate your exam grade :D <br> <br> Glossary: <br> MC = Multiple Choice <br> OE = Open Ended </p>
+  </main>
+  <div class="grid">
+    <div class="card">
+      <label class="field-label">My exam is for...</label>
+      <input class="name-input" id="c-name" value="Research Methods &amp; Statistics Exam (Yr1)">
+      <table class="rows">
+        <thead><tr><th>Fill in the blanks:</th><th>Points</th></tr></thead>
+        <tbody id="c-body">
+          <tr>
+            <td class="name">Alternatives per MC question</td>
+            <td>
+              <div class="radio-group" style="accent-color:#7C8B5D;">
+                <label class="radio-option"><input type="radio" name="mc-alt" value="2">2</label>
+                <label class="radio-option"><input type="radio" name="mc-alt" value="3" checked>3</label>
+                <label class="radio-option"><input type="radio" name="mc-alt" value="4">4</label>
+                <label class="radio-option"><input type="radio" name="mc-alt" value="5">5</label>
+              </div>
+            </td>
+          </tr>
+          <tr><td class="name">Maximum MC Score possible on the exam</td><td><input type="number" id="c-mc-max" value="25" onchange="document.getElementById('c-mc-score-range').max=this.value;"></td></tr>
+          <tr>
+            <td class="name">MC Score you got</td>
+            <td>
+              <div class="slider-row" style="accent-color:#7C8B5D;">
+                <input type="range" id="c-mc-score-range" min="0" max="25" step="0.5" value="0" oninput="onRangeInput(this, ()=>{})">
+                <input type="number" id="c-mc-score" min="0" value="0" oninput="onNumberInput(this, ()=>{})">
+              </div>
+            </td>
+          </tr>
+          <tr><td class="name">Maximum OE Score possible on the exam</td><td><input type="number" id="c-oe-max" value="5" onchange="document.getElementById('c-oe-score-range').max=this.value;"></td></tr>
+          <tr>
+            <td class="name">OE Score you got</td>
+            <td>
+              <div class="slider-row" style="accent-color:#7C8B5D;">
+                <input type="range" id="c-oe-score-range" min="0" max="5" step="0.5" value="0" oninput="onRangeInput(this, ()=>{})">
+                <input type="number" id="c-oe-score" min="0" value="0" oninput="onNumberInput(this, ()=>{})">
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="name">Any deductions from PA's / RWST?</td>
+            <td>
+              <div class="slider-row" style="accent-color:#7C8B5D;">
+                <input type="range" min="0" max="5" step="0.1" value="0" oninput="onRangeInput(this, ()=>{})">
+                <input type="number" id="c-dedu-pas" min="0" step="0.1" value="0" oninput="onNumberInput(this, ()=>{})">
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="name">Any deductions from Weekly Assignments?</td>
+            <td>
+              <div class="slider-row" style="accent-color:#7C8B5D;">
+                <input type="range" min="0" max="5" step="0.1" value="0" oninput="onRangeInput(this, ()=>{})">
+                <input type="number" id="c-dedu-week" min="0" step="0.1" value="0" oninput="onNumberInput(this, ()=>{})">
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="name">Show rounded grade?</td>
+            <td>
+              <div class="toggle-group">
+                <button type="button" class="toggle-btn active" data-value="y" style="background:#7C8B5D;color:#fff;border-color:#7C8B5D;" onclick="setToggle(this,'c-rounded','#7C8B5D')">Yes</button>
+                <button type="button" class="toggle-btn" data-value="n" onclick="setToggle(this,'c-rounded','#7C8B5D')">No</button>
+              </div>
+              <input type="hidden" id="c-rounded" value="y">
+            </td>
+          </tr>
+          <tr>
+            <td class="name">Is this exam a resit?</td>
+            <td>
+              <div class="toggle-group">
+                <button type="button" class="toggle-btn active" data-value="n" style="background:#7C8B5D;color:#fff;border-color:#7C8B5D;" onclick="setToggle(this,'c-resit','#7C8B5D')">No</button>
+                <button type="button" class="toggle-btn" data-value="y" onclick="setToggle(this,'c-resit','#7C8B5D')">Yes</button>
+              </div>
+              <input type="hidden" id="c-resit" value="n">
+              <div style="text-align:right; font-size:11px; color:#8a877e; margin-top:6px; max-width:260px; margin-left:auto;">Resits have a different way of calculating the unrounded mark compared to regular exams. Behavioural Data Science is an exception, which uses the regular formula. Name your course accordingly above.</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <button class="calcbtn" style="background:#7C8B5D;" onclick="calcCourse()">Calculate Grade</button>
+    </div>
+    <div class="outcome" style="background:#7C8B5D; color:#fff;">
+      <h2>Calculated Outcome</h2>
+      <div class="label">Exam Grade</div>
+      <div class="big" id="c-grade">0.0</div>
+      <div class="hr"></div>
+      <div class="row"><span>MC Mark (out of 10)</span><b id="c-mc-mark">0.00</b></div>
+      <div class="row"><span>OE Mark (out of 10)</span><b id="c-oe-mark">0.00</b></div>
+      <div class="row"><span>Total Deductions</span><b id="c-dedu-total">0.00</b></div>
+      <div class="row"><span>Unrounded Mark</span><b id="c-unrounded">0.000</b></div>
+      <div id="c-resit-note" style="display:none; margin-top:14px; padding:12px 14px; border-radius:8px; background:rgba(255,255,255,0.16); font-size:12.5px; line-height:1.5;"></div>
+    </div>
+  </div>
+  <footer class="site">
+    <div><b>CalPsych</b><div class="small">© 2026 CalPsych. All rights reserved.</div></div>
+  </footer>
+</div>
+
+<!-- ================= PAGE 2: SEMESTER GPA ================= -->
+<div class="page" id="page-gpa" style="background:#F3E3D1;">
+  <header class="site">
+    <div class="brand"><span class="mark" style="background:#7C8B5D;">%</span>CalPsych</div>
+    <nav class="site"><a href="#" class="active" style="color:#7C8B5D;" onclick="showPage('course');return false;">Calculator</a><a href="#" onclick="showPage('about');return false;">About</a></nav>
+  </header>
+  <main class="hero">
+    <span class="eyebrow" style="background:#EBD9C4; color:#8A5E2E;">COURSE CALCULATOR</span>
+    <h1 class="title">Course Grade Calculator</h1>
+    <p class="sub">Your course grade is calculated as a <u>weighted</u> average of your exams/assignments from this course. "Weighted" means that some exams/assignments may have a bigger impact on your final grade than others. It's important that you check how heavily weighted each exam/assignment is in your course as this can create a big difference :)) For instance, for the course "Research Methods and Statistics (RMS)", there are 4 exams, each worth 25% of your grade. Failing one exam in this course may not have a significant impact on your final grade. This is different from, for example, Developmental Psychology, where there is only one exam worth 100% of your final course grade.</p> </main></p>
+  </main>
+  <div class="grid">
+    <div class="card">
+      <label class="field-label">Course Name</label>
+      <input class="name-input" id="g-name" value="Research Methods and Statistics">
+      <table class="rows">
+        <thead><tr><th>Exam Name</th><th>Weight (%)</th><th>Grade (/10)</th><th>Action</th></tr></thead>
+        <tbody id="g-body"></tbody>
+      </table>
+      <button class="addrow" style="border-color:#cdd6bd; color:#5A6B3E;" onclick="addGpaRow()">✳ Add Exam</button>
+      <div class="totalrow">Total Weight: <span id="g-totalweight">100</span>%</div>
+      <label class="field-label" style="margin-top:4px;">Round result?</label>
+      <div class="toggle-group" style="justify-content:flex-start; margin-bottom:18px;">
+        <button type="button" class="toggle-btn active" data-value="y" style="background:#7C8B5D;color:#fff;border-color:#7C8B5D;" onclick="setToggle(this,'g-rounded','#7C8B5D')">Yes</button>
+        <button type="button" class="toggle-btn" data-value="n" onclick="setToggle(this,'g-rounded','#7C8B5D')">No</button>
+      </div>
+      <input type="hidden" id="g-rounded" value="y">
+      <button class="calcbtn" style="background:#7C8B5D;" onclick="calcGpa()">Calculate Course Grade</button>
+    </div>
+    <div class="outcome" style="background:#fff; color:#2b2a26;">
+      <h2>Calculated Course Grade</h2>
+      <div class="whitecard-inner" style="background:#F3E3D1;">
+        <div class="label" style="color:#8A5E2E;">Course Grade</div>
+        <div class="big" id="g-gpa" style="color:#8A5E2E;">0.0</div>
+      </div>
+      <div class="stat-line"><span>Weighted Total</span><b id="g-weighted">0.00</b></div>
+      <div class="stat-line"><span>Total Weight Used</span><b id="g-totalweightused">0%</b></div>
+      <div class="stat-line"><span>Unrounded Mark</span><b id="g-unrounded">0.000</b></div>
+    </div>
+  </div>
+  <footer class="site">
+    <div><b>CalPsych</b><div class="small">© 2026 CalPsych. All rights reserved.</div></div>
+  </footer>
+</div>
+
+<!-- ================= PAGE 3: ACADEMIC YEAR ================= -->
+<div class="page" id="page-degree" style="background:#FBF4E9;">
+  <header class="site">
+    <div class="brand"><span class="mark" style="background:#C79764;">%</span>CalPsych</div>
+    <nav class="site"><a href="#" class="active" style="color:#C79764;" onclick="showPage('course');return false;">Calculator</a><a href="#" onclick="showPage('about');return false;">About</a></nav>
+  </header>
+  <main class="hero">
+    <span class="eyebrow" style="background:#F0DDC4; color:#96632F;">ACADEMIC YEAR TRACKER</span>
+    <h1 class="title">Academic Year Calculator</h1>
+    <p class="sub">List every course from your academic year with its grade and EC (credits). Your academic year grade is calculated by 1) Multiplying each course's grade by its EC, 2) Summing these products together, and 3) Dividing by the total EC you can obtain during your academic year. This means that courses which have a smaller weight (e.g., 3 EC) will have less impact on your final grade.</p>
+  </main>
+  <div class="grid">
+    <div class="card">
+      <label class="field-label">Academic Year Name</label>
+      <input class="name-input" id="d-name" value="1st-Year Psychology">
+      <label class="field-label">Maximum EC for the Academic Year</label>
+      <input class="name-input" id="d-maxec" type="number" value="60" onchange="calcDegree()">
+      <table class="rows">
+        <thead><tr><th>Course Name</th><th>Grade (/10)</th><th>EC</th><th>Action</th></tr></thead>
+        <tbody id="d-body"></tbody>
+      </table>
+      <button class="addrow" style="border-color:#e6c9a2; color:#96632F;" onclick="addDegreeRow()">✳ Add Course</button>
+      <div class="totalrow">Total Courses: <span id="d-totalsem">0</span> · Total EC Entered: <span id="d-totalec">0</span></div>
+      <button class="calcbtn" style="background:#C79764;" onclick="calcDegree()">Calculate Academic Year Grade</button>
+    </div>
+    <div class="outcome" style="background:#fff; color:#2b2a26;">
+      <h2>Academic Year Overview</h2>
+      <div class="whitecard-inner" style="background:#FBF4E9;">
+        <div class="label" style="color:#96632F;">Academic Year Grade</div>
+        <div class="big" id="d-gpa" style="color:#C79764;">0.00</div>
+      </div>
+      <div class="stat-line"><span>Weighted Points (Grade × EC)</span><b id="d-weighted">0.00</b></div>
+      <div class="stat-line"><span>Total EC Entered</span><b id="d-credits">0 EC</b></div>
+      <div class="stat-line"><span>EC Progress</span><b id="d-progress">0% Complete</b></div>
+      <div class="trendlabel">COURSE CONTRIBUTION</div>
+      <div class="bars" id="d-bars"></div>
+    </div>
+  </div>
+  <footer class="site">
+    <div><b>CalPsych</b><div class="small">© 2026 CalPsych. All rights reserved.</div></div>
+
+  </footer>
+</div>
+
+<!-- ================= PAGE 4: ABOUT ================= -->
+<div class="page" id="page-about">
+  <header class="site" style="background:#FAF6EA;">
+    <div class="brand"><span class="mark" style="background:#7C8B5D;">%</span>CalPsych</div>
+    <nav class="site"><a href="#" onclick="showPage('course');return false;">Calculator</a><a href="#" class="active" style="color:#7C8B5D;" onclick="showPage('about');return false;">About</a></nav>
+  </header>
+  <main style="background:#FAF6EA; padding:60px 48px 64px; text-align:center;">
+    <span class="eyebrow" style="background:#E4E0D3; color:#6f6b5e;">BUILT BY A PSYCH STUDENT FOR PSYCH STUDENTS</span>
+    <h1 class="title" style="margin:0 auto 16px; max-width:760px;">About CalPsych</h1>
+    <p class="sub" style="margin:0 auto; max-width:640px;"> CalPsych is a simple website that originated from a student's desperate need to create a quick and useful tool to predict her grades. While she took her time to build it and check it thoroughly, please remember that this is still a passion project and may have inaccuracies! Keep in mind the following: <br> <br>
+      
+  </main>
+  <section style="background:#F3E3D1; padding:64px 48px;">
+    <div style="display:grid; grid-template-columns:1.6fr 1fr; gap:40px; align-items:start; max-width:1200px; margin:0 auto;">
+      <div>
+        <h2 style="font-size:28px; font-weight:800; margin-bottom:20px;">How was the calculator made?</h2>
+        <p style="font-size:15px; font-weight:800; margin-bottom:20px"> Examination Regulations:</p>
+        <p style="font-size:15px; color:#5c5a53; line-height:1.6;">This calculator is based on the <a href="https://assets-eu-01.kc-usercontent.com/2a7f7854-b38e-015d-c63a-62b2c8fa2017/6ae8422a-13d8-46a0-8895-003353856258/Examinations%20Regulations%20Year%201%202025%E2%80%932026.pdf" target="_blank">Examinations Regulations Year 1 2025–2026.pdf </a> (p.6-8), as specified by the Teaching and Examination Regulations for Psychology @ University of Amsterdam. Please note that this is a simplified version based on examination regulations from 2025-2026, and therefore may not reflect the most current updates. It is highly recommended to consult the most recent Examinations Regulations for your grade calculation, as well as verify the results you get from CalPsych with the official <a href="https://firstyearpsychology.shinyapps.io/FirstYearGradeCalculator/" target="_blank">calculator</a> given by the University of Amsterdam. The developer of CalPsych is not held responsible for the users' grades. Hence, use this website with caution and make sure to verify the results obtained. </p></p>
+        <h2 style="font-size:15px; font-weight:800; margin-bottom:20px;"> <br> AI statement:</h2>
+        <p style="font-size:15px; color:#5c5a53; line-height:1.6;">This website was built with the help of Claude and Figma AI. Please note that mainly the features of this website, such as the interactive components and layout, were built with the help of AI. The calculations were obtained from formulas, as explained above. </p> 
+      </div>
+      <div class="card">
+        <div style="font-size:46px; font-weight:800; color:#7C8B5D; line-height:1; margin-bottom:16px;">
+        <div style="font-weight:700; font-size:16px; margin-bottom:10px;">Contact</div>
+        <div style="font-size:13.5px; color:#8a877e; line-height:1.5;">email: calpsychuva@gmail.com</div>
+      </div>
+    </div>
+  </section>
+  <footer class="site" style="background:#FAF6EA;">
+    <div><b>CalPsych</b><div class="small">© 2026 CalPsych. All rights reserved.</div></div>
+  </footer>
+</div>
+
+<script>
+/* ---------------- view switching ---------------- */
+// Shared page-switcher: used by the dev viewbar buttons below AND by the
+// "Calculator" / "About" links in each page's header nav.
+function showPage(view){
+  document.querySelectorAll('.viewbar button').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+view).classList.add('active');
+}
+document.querySelectorAll('.viewbar button').forEach(btn=>{
+  btn.addEventListener('click', ()=> showPage(btn.dataset.view));
+});
+
+/* ---------------- reusable slider <-> number sync ---------------- */
+// A "slider-row" wraps a <input type=range> immediately followed by a
+// <input type=number>. Moving either one updates the other and (optionally)
+// calls assignFn(newValue) so callers can also update their own data model.
+function onRangeInput(rangeEl, assignFn){
+  const numberEl = rangeEl.parentElement.querySelector('input[type=number]');
+  numberEl.value = rangeEl.value;
+  assignFn(+rangeEl.value);
+}
+function onNumberInput(numberEl, assignFn){
+  const rangeEl = numberEl.parentElement.querySelector('input[type=range]');
+  if (rangeEl) rangeEl.value = numberEl.value;
+  assignFn(+numberEl.value);
+}
+
+/* ---------------- reusable Yes/No toggle button group ---------------- */
+// Pass the clicked button, the id of the hidden input that stores the
+// selected value, and the accent color to apply to the active button.
+function setToggle(btn, hiddenId, activeColor){
+  const group = btn.parentElement;
+  group.querySelectorAll('.toggle-btn').forEach(b=>{
+    const isActive = b === btn;
+    b.classList.toggle('active', isActive);
+    b.style.background = isActive ? activeColor : '#fff';
+    b.style.color = isActive ? '#fff' : '#5c5a53';
+    b.style.borderColor = isActive ? activeColor : '#e0ddd4';
+  });
+  document.getElementById(hiddenId).value = btn.dataset.value;
+}
+
+/* ---------------- shared rounding rules (used by page 1 and page 2) ---------------- */
+function applyRounding(Unrounded_mark, Rounded){
+  if (Rounded !== "y") return Unrounded_mark.toFixed(3);
+
+  if (Unrounded_mark <= 6.250 && Unrounded_mark >= 5.500) {
+    return "6";
+  } else if (Unrounded_mark >= 4.750 && Unrounded_mark <= 5.499) {
+    return "5";
+  } else if (Unrounded_mark === 1.000 || Unrounded_mark <= 1.000) {
+    return "1";
+  } else {
+    let decimal_part = parseInt(Unrounded_mark.toFixed(3).split(".")[1]);
+    if (decimal_part <= 249) {
+      return `${Math.floor(Unrounded_mark)}`;
+    } else if (decimal_part >= 250 && decimal_part <= 749) {
+      const round_to_half = x => Math.round(x * 2) / 2;
+      return `${round_to_half(Unrounded_mark)}`;
+    } else if (decimal_part >= 749 && decimal_part <= 999) {
+      return `${Math.ceil(Unrounded_mark)}`;
+    } else {
+      return "ERROR";
+    }
+  }
+}
+
+/* ============ PAGE 1: Exam Grade (MC + OE, chance-corrected) ============ */
+function calcCourse(){
+  const MC_score = parseFloat(document.getElementById('c-mc-score').value) || 0;
+  const Maximum_MC_score = parseFloat(document.getElementById('c-mc-max').value) || 0;
+  const Number_of_alternatives_per_question = parseFloat(document.querySelector('input[name="mc-alt"]:checked')?.value) || 0;
+  const OE_score = parseFloat(document.getElementById('c-oe-score').value) || 0;
+  const Maximum_OE_score = parseFloat(document.getElementById('c-oe-max').value) || 0;
+  const PAS_RWST = parseFloat(document.getElementById('c-dedu-pas').value) || 0;
+  const Weekly_assign = parseFloat(document.getElementById('c-dedu-week').value) || 0;
+  const Rounded = document.getElementById('c-rounded').value;
+  const Resit = document.getElementById('c-resit').value;
+
+  // chance correction
+  const correction = Number_of_alternatives_per_question !== 0
+    ? Maximum_MC_score / Number_of_alternatives_per_question
+    : 0;
+  const mcDenom = Maximum_MC_score - correction;
+  const MC_mark = mcDenom !== 0 ? ((MC_score - correction) / mcDenom) * 10 : 0;
+
+  // OE mark
+  const OE_mark = Maximum_OE_score !== 0 ? (OE_score / Maximum_OE_score) * 10 : 0;
+
+  // deductions (same total for a resit as for the corresponding regular exam)
+  const Tot_no_of_dedu = PAS_RWST + Weekly_assign;
+
+  // The Behavioural Data Science course always uses the regular-exam formula,
+  // even on a resit, per the Examinations Regulations.
+  const courseName = (document.getElementById('c-name').value || '').toLowerCase();
+  const isBehaviouralDataScience = courseName.includes('behavioural data science') || courseName.includes('behavioral data science');
+  const useResitFormula = Resit === 'y' && !isBehaviouralDataScience;
+
+  // unrounded final mark: regular exams use 80% MC / 20% OE; resits (except
+  // Behavioural Data Science) use 2/3 MC / 1/3 OE instead.
+  const Unrounded_mark = useResitFormula
+    ? ((2/3) * MC_mark) + ((1/3) * OE_mark) - Tot_no_of_dedu
+    : (0.8 * MC_mark) + (0.2 * OE_mark) - Tot_no_of_dedu;
+
+  document.getElementById('c-mc-mark').textContent = MC_mark.toFixed(2);
+  document.getElementById('c-oe-mark').textContent = OE_mark.toFixed(2);
+  document.getElementById('c-dedu-total').textContent = Tot_no_of_dedu.toFixed(2);
+  document.getElementById('c-unrounded').textContent = Unrounded_mark.toFixed(3);
+  const gradeDisplay = applyRounding(Unrounded_mark, Rounded);
+  document.getElementById('c-grade').textContent = gradeDisplay;
+
+  // Resit rule: if the final mark is 5 or less, the result expires — no EC,
+  // course must be retaken next academic year.
+  const resitNote = document.getElementById('c-resit-note');
+  const gradeNum = parseFloat(gradeDisplay);
+  if (Resit === 'y' && !isNaN(gradeNum) && gradeNum <= 5) {
+    resitNote.style.display = 'block';
+    resitNote.textContent = '⚠️ This mark is 5 or below. Under the resit rules, this result expires — no course credits (EC) are awarded, and the course must be retaken in the next academic year.';
+  } else {
+    resitNote.style.display = 'none';
+  }
+}
+calcCourse();
+
+/* ============ PAGE 2: Course Grade (weighted average of exam grades) ============ */
+let gpaRows = [
+  {name:'Exam 1', weight:25, grade:0},
+  {name:'Exam 2', weight:25, grade:0},
+  {name:'Exam 3', weight:25, grade:0},
+  {name:'Exam 4', weight:25, grade:0},
+];
+function renderGpa(){
+  const body = document.getElementById('g-body');
+  body.innerHTML = gpaRows.map((r,i)=>`
+    <tr>
+      <td class="name"><input type="text" value="${r.name}" onchange="gpaRows[${i}].name=this.value" style="width:130px;" /></td>
+      <td>
+        <div class="slider-row" style="accent-color:#7C8B5D;">
+          <input type="range" min="0" max="100" step="1" value="${r.weight}" oninput="onRangeInput(this, v=>gpaRows[${i}].weight=v)">
+          <input type="number" min="0" max="100" value="${r.weight}" oninput="onNumberInput(this, v=>gpaRows[${i}].weight=v)">
+        </div>
+      </td>
+      <td>
+        <div class="slider-row" style="accent-color:#7C8B5D;">
+          <input type="range" min="0" max="10" step="0.1" value="${r.grade}" oninput="onRangeInput(this, v=>gpaRows[${i}].grade=v)">
+          <input type="number" min="0" max="10" step="0.01" value="${r.grade}" oninput="onNumberInput(this, v=>gpaRows[${i}].grade=v)">
+        </div>
+      </td>
+      <td><button class="remove" onclick="removeGpaRow(${i})">Remove</button></td>
+    </tr>`).join('');
+  document.getElementById('g-totalweight').textContent = gpaRows.reduce((s,r)=>s+r.weight,0);
+}
+function addGpaRow(){ gpaRows.push({name:'New Exam', weight:0, grade:0}); renderGpa(); }
+function removeGpaRow(i){ gpaRows.splice(i,1); renderGpa(); }
+function calcGpa(){
+  const totalWeight = gpaRows.reduce((s,r)=>s+r.weight,0);
+  const weightedSum = gpaRows.reduce((s,r)=>s+r.weight*r.grade,0);
+  const Unrounded_mark = totalWeight>0 ? weightedSum/totalWeight : 0;
+  const Rounded = document.getElementById('g-rounded').value;
+
+  document.getElementById('g-weighted').textContent = weightedSum.toFixed(2);
+  document.getElementById('g-totalweightused').textContent = totalWeight+'%';
+  document.getElementById('g-unrounded').textContent = Unrounded_mark.toFixed(3);
+  document.getElementById('g-gpa').textContent = applyRounding(Unrounded_mark, Rounded);
+}
+renderGpa(); calcGpa();
+
+/* ============ PAGE 3: Academic Year Grade (Σ grade×EC ÷ max EC) ============ */
+let degreeRows = [
+  {name:'Research Methods & Statistics', grade:0, ec:12},
+  {name:'Introductory Psychology and Brain & Cognition', grade:0, ec:12},
+  {name:'Developmental Psychology', grade:0, ec:6},
+  {name:'Work & Organisational and Social Psychology', grade:0, ec:12},
+  {name:'Clinical Psychology and Neuropsychology', grade:0, ec:12},
+  {name:'Behavioural Data Science', grade:0, ec:3},
+  {name:'First Year Thesis', grade:0, ec:3},
+];
+// Rounds to `decimals` places using round-half-up, nudged past binary floating-point
+// representation error (e.g. 8.325 is stored as 8.32499999999999929, which would
+// otherwise round down to 8.32 instead of the expected 8.33).
+function halfUpRound(num, decimals){
+  const factor = Math.pow(10, decimals);
+  const eps = num >= 0 ? 1e-9 : -1e-9;
+  return Math.round(num * factor + eps) / factor;
+}
+function renderDegree(){
+  const body = document.getElementById('d-body');
+  body.innerHTML = degreeRows.map((r,i)=>`
+    <tr>
+      <td class="name"><input type="text" value="${r.name}" onchange="degreeRows[${i}].name=this.value" style="width:180px;" /></td>
+      <td>
+        <div class="slider-row" style="accent-color:#C79764;">
+          <input type="range" min="0" max="10" step="0.1" value="${r.grade}" oninput="onRangeInput(this, v=>degreeRows[${i}].grade=v)">
+          <input type="number" min="0" max="10" step="0.01" value="${r.grade}" oninput="onNumberInput(this, v=>degreeRows[${i}].grade=v)">
+        </div>
+      </td>
+      <td>
+        <div class="slider-row" style="accent-color:#C79764;">
+          <input type="range" min="0" max="30" step="1" value="${r.ec}" oninput="onRangeInput(this, v=>degreeRows[${i}].ec=v)">
+          <input type="number" min="0" value="${r.ec}" oninput="onNumberInput(this, v=>degreeRows[${i}].ec=v)">
+        </div>
+      </td>
+      <td><button class="remove" onclick="removeDegreeRow(${i})">Remove</button></td>
+    </tr>`).join('');
+  document.getElementById('d-totalsem').textContent = degreeRows.length;
+  document.getElementById('d-totalec').textContent = degreeRows.reduce((s,r)=>s+r.ec,0);
+}
+function addDegreeRow(){ degreeRows.push({name:'New Course', grade:0, ec:0}); renderDegree(); }
+function removeDegreeRow(i){ degreeRows.splice(i,1); renderDegree(); }
+function calcDegree(){
+  const maxEc = parseFloat(document.getElementById('d-maxec').value) || 0;
+  const totalEc = degreeRows.reduce((s,r)=>s+r.ec,0);
+  const weightedPoints = degreeRows.reduce((s,r)=>s+r.grade*r.ec,0);
+  const yearGrade = maxEc>0 ? weightedPoints/maxEc : 0;
+
+  document.getElementById('d-gpa').textContent = halfUpRound(yearGrade,2).toFixed(2);
+  document.getElementById('d-weighted').textContent = weightedPoints.toFixed(2);
+  document.getElementById('d-credits').textContent = totalEc+' EC';
+  document.getElementById('d-progress').textContent = (maxEc>0 ? Math.min(100, Math.round(totalEc/maxEc*100)) : 0)+'% Complete';
+
+  const bars = document.getElementById('d-bars');
+  const contributions = degreeRows.map(r=>r.grade*r.ec);
+  const max = Math.max(...contributions, 1);
+  bars.innerHTML = degreeRows.map((r,i)=>{
+    const h = Math.round((contributions[i]/max)*60);
+    const abbr = (r.name.match(/\b\w/g) || []).join('').slice(0,4).toUpperCase();
+    return `<div class="barwrap"><div class="bar" style="height:${h}px; background:#C79764; opacity:${0.55+0.06*i};"></div>${abbr}</div>`;
+  }).join('');
+}
+renderDegree(); calcDegree();
+</script>
+
+</body>
+</html>
