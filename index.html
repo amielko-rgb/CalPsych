@@ -9,7 +9,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; color: #2b2a26; }
 
-  /* ---------- view switcher (not part of replica; lets you flip between the 3 pages) ---------- */
+  /* ---------- view switcher  ---------- */
   .viewbar { display:flex; gap:8px; justify-content:center; padding:10px; background:#1f1e1c; }
   .viewbar button { font-family:inherit; font-size:12.5px; font-weight:600; padding:7px 14px; border-radius:999px; border:1px solid #444; background:#2b2a26; color:#cfcdc6; cursor:pointer; transition:.15s; }
   .viewbar button.active { background:#fff; color:#1f1e1c; border-color:#fff; }
@@ -71,6 +71,7 @@
   footer.site .links { display:flex; gap:22px; color:#57554e; }
   footer .small { color:#8a877e; font-size:12px; margin-top:2px; }
 
+
   /* ---------- new input styles: radio groups, sliders, toggles ---------- */
   .radio-group { display:flex; gap:20px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
   .radio-option { display:flex; align-items:center; gap:6px; font-size:13.5px; font-weight:600; cursor:pointer; color:#2b2a26; }
@@ -79,7 +80,8 @@
   .slider-row input[type=range] { flex:1; min-width:90px; cursor:pointer; }
   .slider-row input[type=number] { width:64px; flex-shrink:0; }
   .toggle-group { display:flex; gap:8px; justify-content:flex-end; }
-  .toggle-btn { padding:8px 16px; border:1px solid #e0ddd4; border-radius:8px; background:#fff; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; color:#5c5a53; transition:.15s; }
+  .toggle-btn { padding:8px 16px; border:1px solid #e0ddd4; border-radius:8px; background:#fff; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; color:#5c5a53; transition:.15s;}
+  
 </style>
 </head>
 <body>
@@ -91,10 +93,12 @@
   <button data-view="about">4 · About</button>
 </div>
 
+
+
 <!-- ================= PAGE 1: EXAM GRADE ================= -->
 <div class="page active" id="page-course" style="background:#FAF6EA;">
   <header class="site">
-    <div class="brand"><span class="mark" style="background:#7C8B5D;">%</span>CalPsych</div>
+    <div class="brand"><span class="mark" style="background:#7C8B5D;">%</span>CalPsych: 1st Year Calculator</div>
     <nav class="site"><a href="#" class="active" style="color:#7C8B5D;" onclick="showPage('course');return false;">Calculator</a><a href="#" onclick="showPage('about');return false;">About</a></nav>
   </header>
   <main class="hero">
@@ -200,10 +204,11 @@
   </footer>
 </div>
 
+
 <!-- ================= PAGE 2: SEMESTER GPA ================= -->
 <div class="page" id="page-gpa" style="background:#F3E3D1;">
   <header class="site">
-    <div class="brand"><span class="mark" style="background:#7C8B5D;">%</span>CalPsych</div>
+    <div class="brand"><span class="mark" style="background:#7C8B5D;">%</span>CalPsych: 1st Year Calculator</div>
     <nav class="site"><a href="#" class="active" style="color:#7C8B5D;" onclick="showPage('course');return false;">Calculator</a><a href="#" onclick="showPage('about');return false;">About</a></nav>
   </header>
   <main class="hero">
@@ -248,7 +253,7 @@
 <!-- ================= PAGE 3: ACADEMIC YEAR ================= -->
 <div class="page" id="page-degree" style="background:#FBF4E9;">
   <header class="site">
-    <div class="brand"><span class="mark" style="background:#C79764;">%</span>CalPsych</div>
+    <div class="brand"><span class="mark" style="background:#C79764;">%</span>CalPsych: 1st Year Calculator</div>
     <nav class="site"><a href="#" class="active" style="color:#C79764;" onclick="showPage('course');return false;">Calculator</a><a href="#" onclick="showPage('about');return false;">About</a></nav>
   </header>
   <main class="hero">
@@ -289,10 +294,11 @@
   </footer>
 </div>
 
+
 <!-- ================= PAGE 4: ABOUT ================= -->
 <div class="page" id="page-about">
   <header class="site" style="background:#FAF6EA;">
-    <div class="brand"><span class="mark" style="background:#7C8B5D;">%</span>CalPsych</div>
+    <div class="brand"><span class="mark" style="background:#7C8B5D;">%</span>CalPsych: 1st Year Calculator</div>
     <nav class="site"><a href="#" onclick="showPage('course');return false;">Calculator</a><a href="#" class="active" style="color:#7C8B5D;" onclick="showPage('about');return false;">About</a></nav>
   </header>
   <main style="background:#FAF6EA; padding:60px 48px 64px; text-align:center;">
@@ -306,7 +312,7 @@
       <div>
         <h2 style="font-size:28px; font-weight:800; margin-bottom:20px;">How was the calculator made?</h2>
         <p style="font-size:15px; font-weight:800; margin-bottom:20px"> Examination Regulations:</p>
-        <p style="font-size:15px; color:#5c5a53; line-height:1.6;">This calculator is based on the <a href="https://assets-eu-01.kc-usercontent.com/2a7f7854-b38e-015d-c63a-62b2c8fa2017/6ae8422a-13d8-46a0-8895-003353856258/Examinations%20Regulations%20Year%201%202025%E2%80%932026.pdf" target="_blank">Examinations Regulations Year 1 2025–2026.pdf </a> (p.6-8), as specified by the Teaching and Examination Regulations for Psychology @ University of Amsterdam. Please note that this is a simplified version based on examination regulations from 2025-2026, and therefore may not reflect the most current updates. It is highly recommended to consult the most recent Examinations Regulations for your grade calculation, as well as verify the results you get from CalPsych with the official <a href="https://firstyearpsychology.shinyapps.io/FirstYearGradeCalculator/" target="_blank">calculator</a> given by the University of Amsterdam. The developer of CalPsych is not held responsible for the users' grades. Hence, use this website with caution and make sure to verify the results obtained. </p></p>
+        <p style="font-size:15px; color:#5c5a53; line-height:1.6;">This calculator is based on the <a href="https://assets-eu-01.kc-usercontent.com/2a7f7854-b38e-015d-c63a-62b2c8fa2017/6ae8422a-13d8-46a0-8895-003353856258/Examinations%20Regulations%20Year%201%202025%E2%80%932026.pdf" target="_blank">Examinations Regulations Year 1 2025–2026.pdf </a> (p.6-8), as specified by the Teaching and Examination Regulations for Psychology @ University of Amsterdam. Please note that this is a simplified version based on examination regulations from 2025-2026, and therefore may not reflect the most current updates. It is highly recommended to consult the most recent Examinations Regulations for your grade calculation, as well as verify the results you get from CalPsych with this <a href="https://firstyearpsychology.shinyapps.io/FirstYearGradeCalculator/" target="_blank">calculator</a> made by <a href="https://www.uva.nl/en/profile/d/o/j.b.vandoorn/j.b.vandoorn.html" target="_blank">Dr. Johnny van Doorn</a>. The developer of CalPsych is not held responsible for the users' grades. Hence, use this website with caution and make sure to verify the results obtained. </p></p>
         <h2 style="font-size:15px; font-weight:800; margin-bottom:20px;"> <br> AI statement:</h2>
         <p style="font-size:15px; color:#5c5a53; line-height:1.6;">This website was built with the help of Claude and Figma AI. Please note that mainly the features of this website, such as the interactive components and layout, were built with the help of AI. The calculations were obtained from formulas, as explained above. </p> 
       </div>
@@ -318,14 +324,15 @@
     </div>
   </section>
   <footer class="site" style="background:#FAF6EA;">
-    <div><b>CalPsych</b><div class="small">© 2026 CalPsych. All rights reserved.</div></div>
+    <div><b>CalPsych: 1st Year Calculator</b><div class="small">© 2026 CalPsych. All rights reserved.</div></div>
   </footer>
 </div>
 
 <script>
+
+
 /* ---------------- view switching ---------------- */
-// Shared page-switcher: used by the dev viewbar buttons below AND by the
-// "Calculator" / "About" links in each page's header nav.
+
 function showPage(view){
   document.querySelectorAll('.viewbar button').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -335,10 +342,7 @@ document.querySelectorAll('.viewbar button').forEach(btn=>{
   btn.addEventListener('click', ()=> showPage(btn.dataset.view));
 });
 
-/* ---------------- reusable slider <-> number sync ---------------- */
-// A "slider-row" wraps a <input type=range> immediately followed by a
-// <input type=number>. Moving either one updates the other and (optionally)
-// calls assignFn(newValue) so callers can also update their own data model.
+/* ---------------- slider and number sync ---------------- */
 function onRangeInput(rangeEl, assignFn){
   const numberEl = rangeEl.parentElement.querySelector('input[type=number]');
   numberEl.value = rangeEl.value;
@@ -350,9 +354,7 @@ function onNumberInput(numberEl, assignFn){
   assignFn(+numberEl.value);
 }
 
-/* ---------------- reusable Yes/No toggle button group ---------------- */
-// Pass the clicked button, the id of the hidden input that stores the
-// selected value, and the accent color to apply to the active button.
+/* ---------------- Yes/No toggle button group ---------------- */
 function setToggle(btn, hiddenId, activeColor){
   const group = btn.parentElement;
   group.querySelectorAll('.toggle-btn').forEach(b=>{
@@ -435,19 +437,18 @@ function calcCourse(){
   document.getElementById('c-grade').textContent = gradeDisplay;
 
   // Resit rule: if the final mark is 5 or less, the result expires — no EC,
-  // course must be retaken next academic year.
   const resitNote = document.getElementById('c-resit-note');
   const gradeNum = parseFloat(gradeDisplay);
   if (Resit === 'y' && !isNaN(gradeNum) && gradeNum <= 5) {
     resitNote.style.display = 'block';
-    resitNote.textContent = '⚠️ This mark is 5 or below. Under the resit rules, this result expires — no course credits (EC) are awarded, and the course must be retaken in the next academic year.';
+    resitNote.textContent = 'This mark is 5 or below. Under the resit rules, this result expires — no course credits (EC) are awarded.';
   } else {
     resitNote.style.display = 'none';
   }
 }
 calcCourse();
 
-/* ============ PAGE 2: Course Grade (weighted average of exam grades) ============ */
+/* ============ PAGE 2: Course Grade  ============ */
 let gpaRows = [
   {name:'Exam 1', weight:25, grade:0},
   {name:'Exam 2', weight:25, grade:0},
@@ -490,7 +491,7 @@ function calcGpa(){
 }
 renderGpa(); calcGpa();
 
-/* ============ PAGE 3: Academic Year Grade (Σ grade×EC ÷ max EC) ============ */
+/* ============ PAGE 3: Academic Year Grade  ============ */
 let degreeRows = [
   {name:'Research Methods & Statistics', grade:0, ec:12},
   {name:'Introductory Psychology and Brain & Cognition', grade:0, ec:12},
@@ -500,9 +501,7 @@ let degreeRows = [
   {name:'Behavioural Data Science', grade:0, ec:3},
   {name:'First Year Thesis', grade:0, ec:3},
 ];
-// Rounds to `decimals` places using round-half-up, nudged past binary floating-point
-// representation error (e.g. 8.325 is stored as 8.32499999999999929, which would
-// otherwise round down to 8.32 instead of the expected 8.33).
+
 function halfUpRound(num, decimals){
   const factor = Math.pow(10, decimals);
   const eps = num >= 0 ? 1e-9 : -1e-9;
