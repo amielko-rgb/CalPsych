@@ -3,10 +3,12 @@
 <head>
 <link rel="icon" type="image/png" href="icon.png">
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CalPsych</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; color: #2b2a26; }
 
   /* ---------- view switcher  ---------- */
@@ -21,7 +23,7 @@
   /* ---------- shared shell ---------- */
   header.site { display:flex; align-items:center; justify-content:space-between; padding:16px 48px; background:#fff; border-bottom:1px solid #eee; }
   .brand { display:flex; align-items:center; gap:10px; font-weight:800; font-size:16.5px; }
-  .brand .mark { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:14px; }
+  .brand .mark { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:14px; flex-shrink:0; }
   nav.site { display:flex; gap:30px; }
   nav.site a { text-decoration:none; color:#57554e; font-size:14.5px; font-weight:500; }
   nav.site a.active { font-weight:700; }
@@ -41,7 +43,7 @@
   table.rows th:last-child, table.rows td:last-child { text-align:right; }
   table.rows td { padding:10px 0; vertical-align:middle; }
   table.rows td.name { font-size:14.5px; font-weight:600; padding-right:10px; }
-  table.rows input, table.rows select { width:100px; padding:8px 10px; border:1px solid #e0ddd4; border-radius:8px; font-size:13.5px; font-family:inherit; }
+  table.rows input, table.rows select { width:var(--w, 100px); padding:8px 10px; border:1px solid #e0ddd4; border-radius:8px; font-size:13.5px; font-family:inherit; }
   table.rows .remove { color:#c9573f; font-size:13.5px; font-weight:600; background:none; border:none; cursor:pointer; font-family:inherit; }
 
   .addrow { margin-top:14px; background:#fff; border:1px solid #cdd6bd; border-radius:9px; padding:9px 16px; font-size:13.5px; font-weight:600; cursor:pointer; font-family:inherit; }
@@ -53,19 +55,24 @@
   .outcome .label { font-size:13px; opacity:.85; margin-bottom:6px; }
   .outcome .big { font-size:46px; font-weight:800; margin-bottom:18px; line-height:1; }
   .hr { height:1px; background:rgba(0,0,0,.08); margin:16px 0; }
-  .outcome .row { display:flex; justify-content:space-between; align-items:center; font-size:14px; padding:6px 0; }
+  .outcome .row { display:flex; justify-content:space-between; align-items:center; gap:12px; font-size:14px; padding:6px 0; }
   .outcome .row b { font-size:16px; font-weight:800; }
   .proj { margin-top:20px; border-radius:10px; padding:16px 18px; }
   .proj .head { font-size:12px; font-weight:800; letter-spacing:.03em; margin-bottom:8px; }
   .proj p { font-size:13.5px; line-height:1.5; }
 
   .whitecard-inner { border-radius:12px; padding:20px; margin-bottom:0; }
-  .stat-line { display:flex; justify-content:space-between; font-size:14px; margin-top:16px; }
+  .stat-line { display:flex; justify-content:space-between; gap:12px; font-size:14px; margin-top:16px; }
   .stat-line b { font-weight:700; }
-  .trendlabel { font-size:11.5px; font-weight:800; letter-spacing:.03em; color:#9a968b; margin:22px 0 10px; }
-  .bars { display:flex; align-items:flex-end; gap:14px; height:60px; }
-  .bars .bar { width:26px; border-radius:5px 5px 0 0; }
-  .bars .barwrap { text-align:center; font-size:11px; color:#8a877e; }
+  .trendlabel { font-size:11.5px; font-weight:800; letter-spacing:.03em; color:#9a968b; margin:22px 0 14px; }
+
+  /* Course-contribution bars: the container is tall enough for the tallest bar (60px)
+     PLUS its label, and each column is bottom-aligned inside it, so nothing can
+     spill upward into the "COURSE CONTRIBUTION" heading. */
+  .bars { display:flex; align-items:flex-end; gap:14px; height:84px; }
+  .bars .barwrap { display:flex; flex-direction:column; justify-content:flex-end; align-items:center; height:100%; flex:0 1 34px; min-width:0; font-size:11px; color:#8a877e; line-height:14px; }
+  .bars .bar { width:26px; max-width:100%; flex-shrink:0; border-radius:5px 5px 0 0; }
+  .bars .barlabel { display:flex; justify-content:center; width:100%; margin-top:4px; white-space:nowrap; }
 
   footer.site { display:flex; justify-content:space-between; align-items:center; padding:22px 48px; border-top:1px solid #eee; font-size:13px; }
   footer.site .links { display:flex; gap:22px; color:#57554e; }
@@ -81,7 +88,89 @@
   .slider-row input[type=number] { width:64px; flex-shrink:0; }
   .toggle-group { display:flex; gap:8px; justify-content:flex-end; }
   .toggle-btn { padding:8px 16px; border:1px solid #e0ddd4; border-radius:8px; background:#fff; font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; color:#5c5a53; transition:.15s;}
-  
+
+  .hint { text-align:right; font-size:11px; color:#8a877e; margin-top:6px; max-width:260px; margin-left:auto; }
+
+  /* ---------- About page layout ---------- */
+  .about-hero { background:#FAF6EA; padding:60px 48px 64px; text-align:center; }
+  .about-section { background:#F3E3D1; padding:64px 48px; }
+  .about-grid { display:grid; grid-template-columns:1.6fr 1fr; gap:40px; align-items:start; max-width:1200px; margin:0 auto; }
+
+
+  /* =====================================================
+     RESPONSIVE — tablets and smaller (single-column layout)
+     ===================================================== */
+  @media (max-width: 900px) {
+    header.site { padding:14px 28px; }
+    main.hero { padding:36px 28px 16px; }
+    .grid { grid-template-columns:1fr; gap:20px; padding:0 28px 40px; }
+    footer.site { padding:20px 28px; }
+    .about-hero { padding:44px 28px; }
+    .about-section { padding:44px 28px; }
+    .about-grid { grid-template-columns:1fr; gap:28px; }
+  }
+
+  /* =====================================================
+     RESPONSIVE — phones
+     ===================================================== */
+  @media (max-width: 640px) {
+    /* view switcher becomes a 2x2 grid instead of one long row */
+    .viewbar { display:grid; grid-template-columns:1fr 1fr; gap:6px; padding:8px; }
+    .viewbar button { border-radius:12px; font-size:12px; padding:9px 8px; line-height:1.25; }
+
+    /* header: brand on top, nav underneath if there's no room */
+    header.site { flex-wrap:wrap; gap:8px 16px; padding:12px 16px; }
+    .brand { font-size:15px; }
+    .brand .mark { width:28px; height:28px; }
+    nav.site { gap:20px; }
+    nav.site a { font-size:14px; }
+
+    main.hero { padding:28px 16px 12px; }
+    .eyebrow { margin-bottom:12px; }
+    h1.title { font-size:28px; }
+    p.sub { font-size:14.5px; margin-bottom:22px; }
+
+    .grid { padding:0 16px 32px; gap:16px; }
+    .card { padding:20px 16px 18px; border-radius:14px; }
+    .outcome { padding:22px 18px; border-radius:14px; }
+    .outcome h2 { font-size:18px; margin-bottom:18px; }
+    .outcome .big { font-size:40px; }
+    .whitecard-inner { padding:16px; }
+    footer.site { padding:18px 16px; }
+
+    /* 16px inputs stop iOS Safari from zooming in when a field is tapped */
+    input.name-input, table.rows input, table.rows select { font-size:16px; }
+    input.name-input { margin-bottom:20px; }
+
+    /* tables turn into stacked "cards": one labelled field per line */
+    table.rows, table.rows tbody, table.rows tr, table.rows td { display:block; width:100%; }
+    table.rows thead { display:none; }
+    table.rows tr { padding:14px 0; border-bottom:1px solid #f0ede4; }
+    table.rows tr:last-child { border-bottom:none; }
+    table.rows td, table.rows td:last-child { padding:4px 0; text-align:left; }
+    table.rows td.name { padding-right:0; font-size:14px; }
+    table.rows td[data-label]::before { content:attr(data-label); display:block; font-size:12px; font-weight:700; color:#8a877e; margin-bottom:6px; }
+    table.rows td > input, table.rows td > select { width:100%; }
+    table.rows td.act, table.rows td.act:last-child { text-align:right; padding-top:0; }
+    table.rows .remove { font-size:14px; padding:8px 0 4px 16px; }
+
+    /* controls line up on the left, under their label */
+    .radio-group { justify-content:flex-start; gap:12px 22px; }
+    .radio-option { font-size:15px; padding:4px 0; }
+    .radio-option input[type=radio] { width:20px; height:20px; }
+    .slider-row { justify-content:flex-start; }
+    .slider-row input[type=range] { min-width:0; }
+    .slider-row input[type=number] { width:76px; }
+    .toggle-group { justify-content:flex-start; }
+    .toggle-btn { padding:10px 20px; font-size:14px; }
+    .hint { text-align:left; max-width:none; margin-left:0; }
+
+    .addrow { width:100%; padding:12px 16px; font-size:14px; }
+    .calcbtn { padding:15px; font-size:16px; }
+
+    .bars { gap:6px; }
+    .bars .barwrap { font-size:10.5px; }
+  }
 </style>
 </head>
 <body>
@@ -180,12 +269,12 @@
                 <button type="button" class="toggle-btn" data-value="y" onclick="setToggle(this,'c-resit','#7C8B5D')">Yes</button>
               </div>
               <input type="hidden" id="c-resit" value="n">
-              <div style="text-align:right; font-size:11px; color:#8a877e; margin-top:6px; max-width:260px; margin-left:auto;">Resits have a different way of calculating the unrounded mark compared to regular exams. Behavioural Data Science is an exception, which uses the regular formula. Name your course accordingly above.</div>
+              <div class="hint">Resits have a different way of calculating the unrounded mark compared to regular exams. Behavioural Data Science is an exception, which uses the regular formula. Name your course accordingly above.</div>
             </td>
           </tr>
         </tbody>
       </table>
-      <button class="calcbtn" style="background:#7C8B5D;" onclick="calcCourse()">Calculate Grade</button>
+      <button class="calcbtn" style="background:#7C8B5D;" onclick="calcCourse(); scrollToResult();">Calculate Grade</button>
     </div>
     <div class="outcome" style="background:#7C8B5D; color:#fff;">
       <h2>Calculated Outcome</h2>
@@ -232,7 +321,7 @@
         <button type="button" class="toggle-btn" data-value="n" onclick="setToggle(this,'g-rounded','#7C8B5D')">No</button>
       </div>
       <input type="hidden" id="g-rounded" value="y">
-      <button class="calcbtn" style="background:#7C8B5D;" onclick="calcGpa()">Calculate Course Grade</button>
+      <button class="calcbtn" style="background:#7C8B5D;" onclick="calcGpa(); scrollToResult();">Calculate Course Grade</button>
     </div>
     <div class="outcome" style="background:#fff; color:#2b2a26;">
       <h2>Calculated Course Grade</h2>
@@ -273,7 +362,7 @@
       </table>
       <button class="addrow" style="border-color:#e6c9a2; color:#96632F;" onclick="addDegreeRow()">✳ Add Course</button>
       <div class="totalrow">Total Courses: <span id="d-totalsem">0</span> · Total EC Entered: <span id="d-totalec">0</span></div>
-      <button class="calcbtn" style="background:#C79764;" onclick="calcDegree()">Calculate Academic Year Grade</button>
+      <button class="calcbtn" style="background:#C79764;" onclick="calcDegree(); scrollToResult();">Calculate Academic Year Grade</button>
     </div>
     <div class="outcome" style="background:#fff; color:#2b2a26;">
       <h2>Academic Year Overview</h2>
@@ -301,18 +390,18 @@
     <div class="brand"><span class="mark" style="background:#7C8B5D;">%</span>CalPsych: 1st Year Calculator</div>
     <nav class="site"><a href="#" onclick="showPage('course');return false;">Calculator</a><a href="#" class="active" style="color:#7C8B5D;" onclick="showPage('about');return false;">About</a></nav>
   </header>
-  <main style="background:#FAF6EA; padding:60px 48px 64px; text-align:center;">
+  <main class="about-hero">
     <span class="eyebrow" style="background:#E4E0D3; color:#6f6b5e;">BUILT BY A PSYCH STUDENT FOR PSYCH STUDENTS</span>
     <h1 class="title" style="margin:0 auto 16px; max-width:760px;">About CalPsych</h1>
     <p class="sub" style="margin:0 auto; max-width:640px;"> CalPsych is a simple website that originated from a student's desperate need to create a quick and useful tool to predict her grades. While she took her time to build it and check it thoroughly, please remember that this is still a passion project and may have inaccuracies! Keep in mind the following: <br> <br>
       
   </main>
-  <section style="background:#F3E3D1; padding:64px 48px;">
-    <div style="display:grid; grid-template-columns:1.6fr 1fr; gap:40px; align-items:start; max-width:1200px; margin:0 auto;">
+  <section class="about-section">
+    <div class="about-grid">
       <div>
         <h2 style="font-size:28px; font-weight:800; margin-bottom:20px;">How was the calculator made?</h2>
         <p style="font-size:15px; font-weight:800; margin-bottom:20px"> Examination Regulations:</p>
-        <p style="font-size:15px; color:#5c5a53; line-height:1.6;">This calculator is based on the <a href="https://assets-eu-01.kc-usercontent.com/2a7f7854-b38e-015d-c63a-62b2c8fa2017/6ae8422a-13d8-46a0-8895-003353856258/Examinations%20Regulations%20Year%201%202025%E2%80%932026.pdf" target="_blank">Examinations Regulations Year 1 2025–2026.pdf </a> (p.6-8), as specified by the Teaching and Examination Regulations for Psychology @ University of Amsterdam. Please note that this is a simplified version based on examination regulations from 2025-2026, and therefore may not reflect the most current updates. It is highly recommended to consult the most recent Examinations Regulations for your grade calculation, as well as verify the results you get from CalPsych with this <a href="https://firstyearpsychology.shinyapps.io/FirstYearGradeCalculator/" target="_blank">calculator</a> made by <a href="https://www.uva.nl/en/profile/d/o/j.b.vandoorn/j.b.vandoorn.html" target="_blank">Dr. Johnny van Doorn</a>. The developer of CalPsych is not held responsible for the users' grades. Hence, use this website with caution and make sure to verify the results obtained. </p></p>
+        <p style="font-size:15px; color:#5c5a53; line-height:1.6;">This calculator is based on the <a href="https://assets-eu-01.kc-usercontent.com/2a7f7854-b38e-015d-c63a-62b2c8fa2017/6ae8422a-13d8-46a0-8895-003353856258/Examinations%20Regulations%20Year%201%202025%E2%80%932026.pdf" target="_blank">Examinations Regulations Year 1 2025–2026.pdf </a> (p.6-8), as specified by the Teaching and Examination Regulations for Psychology @ University of Amsterdam. Please note that this is a simplified version based on examination regulations from 2025-2026, and therefore may not reflect the most current updates. It is highly recommended to consult the most recent Examinations Regulations for your grade calculation, as well as verify the results you get from CalPsych with the <a href="https://firstyearpsychology.shinyapps.io/FirstYearGradeCalculator/" target="_blank">calculator</a> made by <a Dr. Johnny van Doorn. The developer of CalPsych is not held responsible for the users' grades. Hence, use this website with caution and make sure to verify the results obtained. </p></p>
         <h2 style="font-size:15px; font-weight:800; margin-bottom:20px;"> <br> AI statement:</h2>
         <p style="font-size:15px; color:#5c5a53; line-height:1.6;">This website was built with the help of Claude and Figma AI. Please note that mainly the features of this website, such as the interactive components and layout, were built with the help of AI. The calculations were obtained from formulas, as explained above. </p> 
       </div>
@@ -341,6 +430,14 @@ function showPage(view){
 document.querySelectorAll('.viewbar button').forEach(btn=>{
   btn.addEventListener('click', ()=> showPage(btn.dataset.view));
 });
+
+/* On phones the result card sits below the form, so after pressing a
+   "Calculate" button we scroll it into view. Does nothing on wider screens. */
+function scrollToResult(){
+  if (!window.matchMedia('(max-width: 900px)').matches) return;
+  const outcome = document.querySelector('.page.active .outcome');
+  if (outcome) outcome.scrollIntoView({ behavior:'smooth', block:'start' });
+}
 
 /* ---------------- slider and number sync ---------------- */
 function onRangeInput(rangeEl, assignFn){
@@ -459,20 +556,20 @@ function renderGpa(){
   const body = document.getElementById('g-body');
   body.innerHTML = gpaRows.map((r,i)=>`
     <tr>
-      <td class="name"><input type="text" value="${r.name}" onchange="gpaRows[${i}].name=this.value" style="width:130px;" /></td>
-      <td>
+      <td class="name" data-label="Exam Name"><input type="text" value="${r.name}" onchange="gpaRows[${i}].name=this.value" style="--w:130px;" /></td>
+      <td data-label="Weight (%)">
         <div class="slider-row" style="accent-color:#7C8B5D;">
           <input type="range" min="0" max="100" step="1" value="${r.weight}" oninput="onRangeInput(this, v=>gpaRows[${i}].weight=v)">
           <input type="number" min="0" max="100" value="${r.weight}" oninput="onNumberInput(this, v=>gpaRows[${i}].weight=v)">
         </div>
       </td>
-      <td>
+      <td data-label="Grade (/10)">
         <div class="slider-row" style="accent-color:#7C8B5D;">
           <input type="range" min="0" max="10" step="0.1" value="${r.grade}" oninput="onRangeInput(this, v=>gpaRows[${i}].grade=v)">
           <input type="number" min="0" max="10" step="0.01" value="${r.grade}" oninput="onNumberInput(this, v=>gpaRows[${i}].grade=v)">
         </div>
       </td>
-      <td><button class="remove" onclick="removeGpaRow(${i})">Remove</button></td>
+      <td class="act"><button class="remove" onclick="removeGpaRow(${i})">Remove</button></td>
     </tr>`).join('');
   document.getElementById('g-totalweight').textContent = gpaRows.reduce((s,r)=>s+r.weight,0);
 }
@@ -511,20 +608,20 @@ function renderDegree(){
   const body = document.getElementById('d-body');
   body.innerHTML = degreeRows.map((r,i)=>`
     <tr>
-      <td class="name"><input type="text" value="${r.name}" onchange="degreeRows[${i}].name=this.value" style="width:180px;" /></td>
-      <td>
+      <td class="name" data-label="Course Name"><input type="text" value="${r.name}" onchange="degreeRows[${i}].name=this.value" style="--w:180px;" /></td>
+      <td data-label="Grade (/10)">
         <div class="slider-row" style="accent-color:#C79764;">
           <input type="range" min="0" max="10" step="0.1" value="${r.grade}" oninput="onRangeInput(this, v=>degreeRows[${i}].grade=v)">
           <input type="number" min="0" max="10" step="0.01" value="${r.grade}" oninput="onNumberInput(this, v=>degreeRows[${i}].grade=v)">
         </div>
       </td>
-      <td>
+      <td data-label="EC">
         <div class="slider-row" style="accent-color:#C79764;">
           <input type="range" min="0" max="30" step="1" value="${r.ec}" oninput="onRangeInput(this, v=>degreeRows[${i}].ec=v)">
           <input type="number" min="0" value="${r.ec}" oninput="onNumberInput(this, v=>degreeRows[${i}].ec=v)">
         </div>
       </td>
-      <td><button class="remove" onclick="removeDegreeRow(${i})">Remove</button></td>
+      <td class="act"><button class="remove" onclick="removeDegreeRow(${i})">Remove</button></td>
     </tr>`).join('');
   document.getElementById('d-totalsem').textContent = degreeRows.length;
   document.getElementById('d-totalec').textContent = degreeRows.reduce((s,r)=>s+r.ec,0);
@@ -548,7 +645,7 @@ function calcDegree(){
   bars.innerHTML = degreeRows.map((r,i)=>{
     const h = Math.round((contributions[i]/max)*60);
     const abbr = (r.name.match(/\b\w/g) || []).join('').slice(0,4).toUpperCase();
-    return `<div class="barwrap"><div class="bar" style="height:${h}px; background:#C79764; opacity:${0.55+0.06*i};"></div>${abbr}</div>`;
+    return `<div class="barwrap"><div class="bar" style="height:${h}px; background:#C79764; opacity:${0.55+0.06*i};"></div><div class="barlabel">${abbr}</div></div>`;
   }).join('');
 }
 renderDegree(); calcDegree();
