@@ -520,14 +520,21 @@ function calcCourse(){
   const isBehaviouralDataScience = courseName.includes('behavioural data science') || courseName.includes('behavioral data science');
   const useResitFormula = Resit === 'y' && !isBehaviouralDataScience;
 
-  // unrounded final mark: regular exams use 80% MC / 20% OE; resits (except
-  // Behavioural Data Science) use 2/3 MC / 1/3 OE instead.
-  const Unrounded_mark = useResitFormula
-    ? ((2/3) * MC_mark) + ((1/3) * OE_mark) - Tot_no_of_dedu
-    : (0.8 * MC_mark) + (0.2 * OE_mark) - Tot_no_of_dedu;
+  // If the exam has no OE part (max OE = 0), MC counts for 100% of the mark.
+  // Otherwise: regular exams use 80% MC / 20% OE; resits (except Behavioural
+  // Data Science) use 2/3 MC / 1/3 OE instead.
+  const hasOE = Maximum_OE_score > 0;
+  let Unrounded_mark;
+  if (!hasOE) {
+    Unrounded_mark = MC_mark - Tot_no_of_dedu;
+  } else if (useResitFormula) {
+    Unrounded_mark = ((2/3) * MC_mark) + ((1/3) * OE_mark) - Tot_no_of_dedu;
+  } else {
+    Unrounded_mark = (0.8 * MC_mark) + (0.2 * OE_mark) - Tot_no_of_dedu;
+  }
 
   document.getElementById('c-mc-mark').textContent = MC_mark.toFixed(2);
-  document.getElementById('c-oe-mark').textContent = OE_mark.toFixed(2);
+  document.getElementById('c-oe-mark').textContent = hasOE ? OE_mark.toFixed(2) : 'N/A';
   document.getElementById('c-dedu-total').textContent = Tot_no_of_dedu.toFixed(2);
   document.getElementById('c-unrounded').textContent = Unrounded_mark.toFixed(3);
   const gradeDisplay = applyRounding(Unrounded_mark, Rounded);
